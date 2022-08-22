@@ -1,7 +1,5 @@
 library top_bottom_sheet_flutter;
 
-import 'package:flutter/widgets.dart';
-
 /// Top Bottom Sheet
 import 'dart:async';
 
@@ -9,6 +7,7 @@ import 'package:flutter/material.dart';
 
 class TopModalSheet extends StatefulWidget {
   final Color closeButtonBackgroundColor;
+  final Color? backgroundColor;
   final Widget? closeButtonIcon;
   final double closeButtonRadius;
   final bool isShowCloseButton;
@@ -16,11 +15,12 @@ class TopModalSheet extends StatefulWidget {
 
   const TopModalSheet(
       {Key? key,
-        required this.child,
-        this.closeButtonBackgroundColor = Colors.white,
-        this.closeButtonIcon,
-        this.closeButtonRadius = 20.0,
-        this.isShowCloseButton = false})
+      required this.child,
+      this.closeButtonBackgroundColor = Colors.white,
+      this.backgroundColor,
+      this.closeButtonIcon,
+      this.closeButtonRadius = 20.0,
+      this.isShowCloseButton = false})
       : super(key: key);
 
   @override
@@ -28,19 +28,18 @@ class TopModalSheet extends StatefulWidget {
 
   static show(
       {required BuildContext context,
-        @required child,
-        closeButtonIcon,
-        closeButtonRadius,
-        isShowCloseButton,
-        closeButtonBackgroundColor}) {
+      @required child,
+      closeButtonIcon,
+      closeButtonRadius,
+      isShowCloseButton,
+      closeButtonBackgroundColor}) {
     Navigator.push(
         context,
         PageRouteBuilder(
             pageBuilder: (_, __, ___) {
               return TopModalSheet(
                 child: child,
-                closeButtonBackgroundColor:
-                closeButtonBackgroundColor ?? Colors.white,
+                closeButtonBackgroundColor: closeButtonBackgroundColor ?? Colors.white,
                 closeButtonIcon: closeButtonIcon,
                 closeButtonRadius: double.parse(closeButtonRadius.toString()),
                 isShowCloseButton: isShowCloseButton,
@@ -50,8 +49,7 @@ class TopModalSheet extends StatefulWidget {
   }
 }
 
-class _TopModalSheetState extends State<TopModalSheet>
-    with SingleTickerProviderStateMixin {
+class _TopModalSheetState extends State<TopModalSheet> with SingleTickerProviderStateMixin {
   late Animation<double> _animation;
   late AnimationController _animationController;
 
@@ -62,18 +60,15 @@ class _TopModalSheetState extends State<TopModalSheet>
     return renderBox.size.height;
   }
 
-  bool get _dismissUnderway =>
-      _animationController.status == AnimationStatus.reverse;
+  bool get _dismissUnderway => _animationController.status == AnimationStatus.reverse;
 
   @override
   void initState() {
     super.initState();
 
-    _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
 
-    _animation = Tween<double>(begin: _isDirectionTop() ? -1 : 1, end: 0)
-        .animate(_animationController);
+    _animation = Tween<double>(begin: _isDirectionTop() ? -1 : 1, end: 0).animate(_animationController);
 
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.dismissed) Navigator.pop(context);
@@ -91,8 +86,7 @@ class _TopModalSheetState extends State<TopModalSheet>
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_dismissUnderway) return;
 
-    var change =
-        details.primaryDelta! / (_childHeight ?? details.primaryDelta!);
+    var change = details.primaryDelta! / (_childHeight ?? details.primaryDelta!);
     if (_isDirectionTop()) {
       _animationController.value += change;
     } else {
@@ -107,8 +101,7 @@ class _TopModalSheetState extends State<TopModalSheet>
     if (details.velocity.pixelsPerSecond.dy < 0 && !_isDirectionTop()) return;
 
     if (details.velocity.pixelsPerSecond.dy > 700) {
-      final double flingVelocity =
-          -details.velocity.pixelsPerSecond.dy / _childHeight;
+      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (_animationController.value > 0.0) {
         _animationController.fling(velocity: flingVelocity);
       }
@@ -131,7 +124,7 @@ class _TopModalSheetState extends State<TopModalSheet>
           onVerticalDragEnd: _handleDragEnd,
           child: SafeArea(
             child: Scaffold(
-              backgroundColor: Colors.black38,
+              backgroundColor: widget.backgroundColor ?? Colors.black38,
               body: Stack(
                 children: [
                   SingleChildScrollView(
@@ -142,8 +135,7 @@ class _TopModalSheetState extends State<TopModalSheet>
                             animation: _animation,
                             builder: (context, _) {
                               return Transform(
-                                transform: Matrix4.translationValues(
-                                    0.0, width * _animation.value, 0.0),
+                                transform: Matrix4.translationValues(0.0, width * _animation.value, 0.0),
                                 child: SizedBox(
                                   width: width,
                                   child: GestureDetector(
@@ -187,9 +179,8 @@ class _TopModalSheetState extends State<TopModalSheet>
         backgroundColor: widget.closeButtonBackgroundColor,
         child: const Icon(Icons.close),
       );
-    } else {
-      return widget.closeButtonIcon;
     }
+    return widget.closeButtonIcon;
   }
 
   bool _isDirectionTop() {
